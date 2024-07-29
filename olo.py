@@ -1,74 +1,77 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
+from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import OneHotEncoder
+import matplotlib.pyplot as plt
 
-# Título de la aplicación
-st.title('Análisis Estadístico de Datos de Alimentos')
+st.title('Regresión Lineal Simple')
 
-# Cargar el dataset
-uploaded_file = st.file_uploader("Elige un archivo CSV", type="csv")
+# Subir archivo CSV
+uploaded_file = st.file_uploader('Sube tu archivo CSV', type='csv')
+
 if uploaded_file is not None:
+    # Cargar el archivo CSV
     data = pd.read_csv(uploaded_file)
-    
-    # Mostrar los primeros datos
-    st.header('Primeros datos del dataset')
-    st.write(data.head())
 
-    # Diagrama de torta para la columna 'food'
-    st.header('Distribución de Tipos de Comida')
-    food_counts = data['food'].value_counts()
-    fig1, ax1 = plt.subplots()
-    ax1.pie(food_counts, labels=food_counts.index, autopct='%1.1f%%', startangle=90)
-    ax1.axis('equal')  # Para que sea un círculo
-    st.pyplot(fig1)
+    # Convertir la columna 'food' a variables dummy
+    encoder = OneHotEncoder()
+    food_encoded = encoder.fit_transform(data[['food']]).toarray()
+    food_encoded_df = pd.DataFrame(food_encoded, columns=encoder.get_feature_names_out(['food']))
 
-    # Histograma y regresión lineal para la columna 'Caloric Value'
-    st.header('Histograma de Caloric Value y Regresión Lineal')
-    fig2, ax2 = plt.subplots()
-    sns.histplot(data['Caloric Value'], kde=True, ax=ax2)
-    st.pyplot(fig2)
+    # Añadir las columnas codificadas al dataframe original
+    data_encoded = pd.concat([data, food_encoded_df], axis=1)
 
-    # Regresión lineal simple
-    st.header('Regresión Lineal Simple')
-    x = data['Caloric Value'].values.reshape(-1, 1)
-    y = data['Fat'].values.reshape(-1, 1)
-    model = LinearRegression()
-    model.fit(x, y)
-    y_pred = model.predict(x)
+    # Extraer las columnas pertinentes para Caloric Value
+    X_caloric = food_encoded_df
+    y_caloric = data['Caloric Value']
 
-    # Graficar la regresión lineal
-    fig3, ax3 = plt.subplots()
-    ax3.scatter(data['Caloric Value'], data['Fat'], color='blue')
-    ax3.plot(data['Caloric Value'], y_pred, color='red')
-    ax3.set_xlabel('Caloric Value')
-    ax3.set_ylabel('Fat')
-    st.pyplot(fig3)
+    # Extraer las columnas pertinentes para Saturated Fats
+    X_saturated = food_encoded_df
+    y_saturated = data['Saturated Fats']
 
-    # Mostrar la precisión del modelo
-    st.write(f'Taza de precisión del modelo: {model.score(x, y):.2f}')
+    # Dividir los datos en conjuntos de entrenamiento y prueba
+    X_train_caloric, X_test_caloric, y_train_caloric, y_test_caloric = train_test_split(X_caloric, y_caloric, test_size=0.2, random_state=42)
+    X_train_saturated, X_test_saturated, y_train_saturated, y_test_saturated = train_test_split(X_saturated, y_saturated, test_size=0.2, random_state=42)
 
-    # Otros gráficos estadísticos
-    st.header('Otros Gráficos Estadísticos')
+    # Crear los modelos de regresión lineal
+    model_caloric = LinearRegression()
+    model_saturated = LinearRegression()
 
-    # Boxplot
-    fig4, ax4 = plt.subplots()
-    sns.boxplot(x=data['Caloric Value'], ax=ax4)
-    ax4.set_title('Boxplot de Caloric Value')
-    st.pyplot(fig4)
+    # Ajustar los modelos a los datos de entrenamiento
+    model_caloric.fit(X_train_caloric, y_train_caloric)
+    model_saturated.fit(X_train_saturated, y_train_saturated)
 
-    # Pairplot
-    st.header('Pairplot de Variables Numéricas')
-    sns.pairplot(data.select_dtypes(include=[np.number]).dropna())
-    st.pyplot()
+    # Realizar predicciones sobre el conjunto de prueba
+    y_pred_caloric = model_caloric.predict(X_test_caloric)
+    y_pred_saturated = model_saturated.predict(X_test_saturated)
 
-    # Correlation matrix heatmap
-    st.header('Heatmap de la Matriz de Correlación')
-    fig5, ax5 = plt.subplots()
-    corr = data.corr()
-    sns.heatmap(corr, annot=True, cmap='coolwarm', ax=ax5)
-    st.pyplot(fig5)
-else:
-    st.write("Por favor, sube un archivo CSV para continuar.")
+    # Calcular el error cuadrático medio y el coeficiente de determinación R^2
+    mse_caloric = mean_squared_error(y_test_caloric, y_pred_caloric)
+    r2_caloric = r2_score(y_test_caloric, y_pred_caloric)
+    mse_saturated = mean_squared_error(y_test_saturated, y_pred_saturated)
+    r2_saturated = r2_score(y_test_saturated, y_pred_saturated)
+
+    # Mostrar los resultados
+    st.write(f'Caloric Value - MSE: {mse_caloric}, R^2: {r2_caloric}')
+    st.write(f'Saturated Fats - MSE: {mse_saturated}, R^2: {r2_saturated}')
+
+    # Visualizar los resultados para Caloric Value
+    fig_caloric, ax_caloric = plt.subplots()
+    ax_caloric.scatter(y_test_caloric, y_pred_caloric, color='blue', label='Datos reales vs Predicciones')
+    ax_caloric.set_xlabel('Valores reales de Caloric Value')
+    ax_caloric.set_ylabel('Valores predichos de Caloric Value')
+    ax_caloric.set_title('Regresión Lineal Simple - Caloric Value')
+    ax_caloric.legend()
+    st.pyplot(fig_caloric)
+
+    # Visualizar los resultados para Saturated Fats
+    fig_saturated, ax_saturated = plt.subplots()
+    ax_saturated.scatter(y_test_saturated, y_pred_saturated, color='blue', label='Datos reales vs Predicciones')
+    ax_saturated.set_xlabel('Valores reales de Saturated Fats')
+    ax_saturated.set_ylabel('Valores predichos de Saturated Fats')
+    ax_saturated.set_title('Regresión Lineal Simple - Saturated Fats')
+    ax_saturated.legend()
+    st.pyplot(fig_saturated)
