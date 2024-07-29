@@ -76,7 +76,8 @@ def generate_plots(df):
             y = df['serumcholestrol'].values.reshape(-1, 1)
             reg = LinearRegression().fit(X, y)
             r_squared = reg.score(X, y)
-            plt.text(x=df['restingBP'].mean(), y=df['serumcholestrol'].max(), s=f'R cuadrado: {r_squared:.2f}', horizontalalignment='center', fontsize=12, color='blue')
+            correlation = np.corrcoef(df['restingBP'], df['serumcholestrol'])[0, 1]
+            plt.text(x=df['restingBP'].mean(), y=df['serumcholestrol'].max(), s=f'R cuadrado: {r_squared:.2f}\nCorrelación: {correlation:.2f}', horizontalalignment='center', fontsize=12, color='blue')
         generate_and_save_plot(plot_regression, 'regresion_presion_colesterol.png')
 
     if 'oldpeak' in columns and 'target' in columns:
