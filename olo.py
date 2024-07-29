@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
 
 # Título de la aplicación
 st.title('Análisis Estadístico de Datos de Alimentos')
@@ -25,38 +25,45 @@ if uploaded_file is not None:
     ax1.axis('equal')  # Para que sea un círculo
     st.pyplot(fig1)
 
-    # Histograma y regresión lineal para la columna 'Caloric Value'
-    st.header('Histograma de Caloric Value y Regresión Lineal')
+    # Histograma de una columna seleccionada
+    st.header('Histograma de una Columna Seleccionada')
+    column = st.selectbox('Selecciona una columna para el histograma', data.columns)
     fig2, ax2 = plt.subplots()
-    sns.histplot(data['Caloric Value'], kde=True, ax=ax2)
+    sns.histplot(data[column], kde=True, ax=ax2)
     st.pyplot(fig2)
 
-    # Regresión lineal simple
-    st.header('Regresión Lineal Simple')
-    x = data['Caloric Value'].values.reshape(-1, 1)
-    y = data['Fat'].values.reshape(-1, 1)
-    model = LinearRegression()
-    model.fit(x, y)
-    y_pred = model.predict(x)
+    # Selección de columnas para el modelo de Random Forest
+    st.header('Modelo de Bosque Aleatorio')
+    target_column = st.selectbox('Selecciona la columna objetivo (Y)', data.columns)
+    feature_columns = st.multiselect('Selecciona las columnas características (X)', data.columns)
 
-    # Graficar la regresión lineal
-    fig3, ax3 = plt.subplots()
-    ax3.scatter(data['Caloric Value'], data['Fat'], color='blue')
-    ax3.plot(data['Caloric Value'], y_pred, color='red')
-    ax3.set_xlabel('Caloric Value')
-    ax3.set_ylabel('Fat')
-    st.pyplot(fig3)
-
-    # Mostrar la precisión del modelo
-    st.write(f'Taza de precisión del modelo: {model.score(x, y):.2f}')
+    if target_column and feature_columns:
+        X = data[feature_columns].values
+        y = data[target_column].values
+        
+        # Entrenamiento del modelo
+        model = RandomForestRegressor()
+        model.fit(X, y)
+        y_pred = model.predict(X)
+        
+        # Graficar predicciones vs valores reales
+        fig3, ax3 = plt.subplots()
+        ax3.scatter(y, y_pred, color='blue')
+        ax3.set_xlabel('Valores Reales')
+        ax3.set_ylabel('Predicciones')
+        ax3.set_title(f'Predicciones vs Valores Reales ({target_column})')
+        st.pyplot(fig3)
+        
+        # Mostrar la precisión del modelo
+        st.write(f'R^2 Score del modelo: {model.score(X, y):.2f}')
 
     # Otros gráficos estadísticos
     st.header('Otros Gráficos Estadísticos')
 
     # Boxplot
     fig4, ax4 = plt.subplots()
-    sns.boxplot(x=data['Caloric Value'], ax=ax4)
-    ax4.set_title('Boxplot de Caloric Value')
+    sns.boxplot(x=data[column], ax=ax4)
+    ax4.set_title(f'Boxplot de {column}')
     st.pyplot(fig4)
 
     # Pairplot
