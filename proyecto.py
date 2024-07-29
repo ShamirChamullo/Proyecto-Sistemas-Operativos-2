@@ -28,6 +28,16 @@ if uploaded_file is not None:
     x_var = st.selectbox('Variable Independiente (X)', ['Suscribers', 'Likes', 'Comments'])
     y_var = st.selectbox('Variable Dependiente (Y)', ['Visits'])
 
+    # Selección de rango de datos
+    st.write(f"Seleccione el rango de valores para {x_var} y {y_var}:")
+    x_min = st.number_input(f"Valor mínimo de {x_var}", value=float(data[x_var].min()))
+    x_max = st.number_input(f"Valor máximo de {x_var}", value=float(data[x_var].max()))
+    y_min = st.number_input(f"Valor mínimo de {y_var}", value=float(data[y_var].min()))
+    y_max = st.number_input(f"Valor máximo de {y_var}", value=float(data[y_var].max()))
+
+    # Filtrar datos según los rangos seleccionados
+    filtered_data = data[(data[x_var] >= x_min) & (data[x_var] <= x_max) & (data[y_var] >= y_min) & (data[y_var] <= y_max)]
+
     # Función para crear gráficos de regresión
     def plot_regression(x, y, x_label, y_label, title):
         model = LinearRegression()
@@ -36,7 +46,7 @@ if uploaded_file is not None:
         r2 = r2_score(y, y_pred)
         
         plt.figure(figsize=(10, 6))
-        sns.scatterplot(x=x.flatten(), y=y, data=data, label='Datos reales')
+        sns.scatterplot(x=x.flatten(), y=y, data=filtered_data, label='Datos reales')
         plt.plot(x, y_pred, color='red', label='Regresión lineal')
         plt.xlabel(x_label)
         plt.ylabel(y_label)
@@ -46,8 +56,8 @@ if uploaded_file is not None:
         st.write(f'Valor de R²: {r2:.2f}')
     
     # Ejecutar regresión lineal basada en selección del usuario
-    X = data[x_var].values.reshape(-1, 1)
-    y = data[y_var].values
+    X = filtered_data[x_var].values.reshape(-1, 1)
+    y = filtered_data[y_var].values
     plot_regression(X, y, x_var, y_var, f'Regresión Lineal entre {x_var} y {y_var}')
 
     # Histogramas
