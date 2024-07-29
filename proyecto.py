@@ -80,6 +80,23 @@ def generate_plots(df):
             plt.text(x=df['restingBP'].mean(), y=df['serumcholestrol'].max(), s=f'R cuadrado: {r_squared:.2f}\nCorrelación: {correlation:.2f}', horizontalalignment='center', fontsize=12, color='blue')
         generate_and_save_plot(plot_regression, 'regresion_presion_colesterol.png')
 
+    if 'age' in columns and 'serumcholestrol' in columns:
+        # Gráfico de dispersión con regresión lineal simple
+        st.write("### Regresión Lineal: Edad vs Colesterol en Suero")
+        def plot_regression_age_chol():
+            sns.lmplot(x='age', y='serumcholestrol', data=df, aspect=1.5, scatter_kws={'s':100}, line_kws={'color':'red'})
+            plt.title('Regresión Lineal de Edad vs Colesterol en Suero')
+            plt.xlabel('Edad')
+            plt.ylabel('Colesterol en Suero')
+            # Calcular y mostrar el coeficiente de correlación y el R cuadrado
+            X = df['age'].values.reshape(-1, 1)
+            y = df['serumcholestrol'].values.reshape(-1, 1)
+            reg = LinearRegression().fit(X, y)
+            r_squared = reg.score(X, y)
+            correlation = np.corrcoef(df['age'], df['serumcholestrol'])[0, 1]
+            plt.text(x=df['age'].mean(), y=df['serumcholestrol'].max(), s=f'R cuadrado: {r_squared:.2f}\nCorrelación: {correlation:.2f}', horizontalalignment='center', fontsize=12, color='blue')
+        generate_and_save_plot(plot_regression_age_chol, 'regresion_edad_colesterol.png')
+        
     if 'oldpeak' in columns and 'target' in columns:
         # Boxplot de 'oldpeak' por 'target'
         st.write("### Oldpeak por Objetivo")
