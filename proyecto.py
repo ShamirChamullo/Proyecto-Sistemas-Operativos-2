@@ -37,17 +37,18 @@ if uploaded_file is not None:
     plt.ylabel('')
     st.pyplot(plt)
 
-    # Identificar la marca más vendida
-    top_make = df['Make'].value_counts().idxmax()
+    # Selector de marca
+    marcas = df['Make'].unique()
+    selected_make = st.selectbox("Selecciona la marca del auto", marcas)
 
-    # Filtrar datos de la marca más vendida
-    top_make_data = df[df['Make'] == top_make]
+    # Filtrar datos de la marca seleccionada
+    selected_make_data = df[df['Make'] == selected_make]
 
-    # Regresión lineal simple entre el año y el precio de la marca más vendida
-    st.write(f'Regresión Lineal: Año vs Precio de {top_make}')
+    # Regresión lineal simple entre el año y el precio de la marca seleccionada
+    st.write(f'Regresión Lineal: Año vs Precio de {selected_make}')
     plt.figure(figsize=(10, 6))
-    sns.regplot(x='Year', y='Price (USD)', data=top_make_data)
-    plt.title(f'Regresión Lineal: Año vs Precio de {top_make}')
+    sns.regplot(x='Year', y='Price (USD)', data=selected_make_data)
+    plt.title(f'Regresión Lineal: Año vs Precio de {selected_make}')
     plt.xlabel('Año')
     plt.ylabel('Precio (USD)')
     st.pyplot(plt)
