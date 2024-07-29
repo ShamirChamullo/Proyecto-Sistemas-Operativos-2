@@ -2,9 +2,8 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import statsmodels.api as sm
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
+import numpy as np
+from scipy import stats
 
 # Configurar el estilo de los gráficos
 sns.set(style="whitegrid")
@@ -18,11 +17,11 @@ uploaded_file = st.file_uploader("Sube tu archivo CSV", type="csv")
 if uploaded_file is not None:
     # Cargar el archivo CSV
     df = pd.read_csv(uploaded_file)
-    
+
     # Mostrar las primeras filas del dataframe
     st.write("Primeras filas del dataset:")
     st.write(df.head())
-    
+
     # Histograma de precios
     st.write("Distribución de Precios de Autos")
     plt.figure(figsize=(10, 6))
@@ -40,38 +39,35 @@ if uploaded_file is not None:
     plt.ylabel('')
     st.pyplot(plt)
 
-    # Selector de marca
-    marcas = df['Make'].unique()
-    selected_make = st.selectbox("Selecciona la marca del auto", marcas)
+    # Identificar la marca más vendida
+    top_make = df['Make'].value_counts().idxmax()
 
-    # Filtrar datos de la marca seleccionada
-    selected_make_data = df[df['Make'] == selected_make]
+    # Filtrar datos de la marca más vendida
+    top_make_data = df[df['Make'] == top_make]
 
-    # Regresión lineal simple entre el año y el precio de la marca seleccionada
-    st.write(f'Regresión Lineal: Año vs Precio de {selected_make}')
+    # Regresión lineal simple entre el año y el precio de la marca más vendida
+    st.write(f'Regresión Lineal: Año vs Precio de {top_make}')
     
-    X = selected_make_data['Year'].values.reshape(-1, 1)
-    y = selected_make_data['Price (USD)'].values
-    
-    # Crear y ajustar el modelo de regresión lineal
-    model = LinearRegression()
-    model.fit(X, y)
-    
-    # Predicciones
-    y_pred = model.predict(X)
-    
-    # Calcular el coeficiente de determinación R^2
-    r2 = r2_score(y, y_pred)
-    
+    # Calcular la correlación y R-squared
+    correlation, _ = stats.pearsonr(top_make_data['Year'], top_make_data['Price (USD)'])
+    slope, intercept, r_value, _, _ = stats.linregress(top_make_data['Year'], top_make_data['Price (USD)'])
+    r_squared = r_value**2
+
     plt.figure(figsize=(10, 6))
-    sns.regplot(x='Year', y='Price (USD)', data=selected_make_data, line_kws={'color': 'red'})
-    plt.title(f'Regresión Lineal: Año vs Precio de {selected_make} (R^2 = {r2:.2f})')
+    sns.regplot(x='Year', y='Price (USD)', data=top_make_data)
+    plt.title(f'Regresión Lineal: Año vs Precio de {top_make}')
     plt.xlabel('Año')
     plt.ylabel('Precio (USD)')
+    
+    # Añadir texto con la correlación y R-squared
+    plt.text(0.05, 0.95, f'Correlación: {correlation:.2f}\nR-squared: {r_squared:.2f}', 
+             transform=plt.gca().transAxes, verticalalignment='top')
+    
     st.pyplot(plt)
 
     # Mostrar algunas estadísticas descriptivas del dataset
     st.write("Estadísticas descriptivas del dataset:")
     st.write(df.describe())
+
 else:
     st.write("Por favor, sube un archivo CSV para analizar los datos.")
