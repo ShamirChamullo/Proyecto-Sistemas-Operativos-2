@@ -57,31 +57,3 @@ if uploaded_file is not None:
     y = data['Visits'].values
     st.write("Regresión lineal entre Comentarios y Visitas")
     plot_regression(X, y, 'Comments', 'Visits', 'Regresión Lineal entre Comentarios y Visitas')
-
-    # Histogramas
-    st.write("Histogramas de las variables numéricas")
-    for column in ['Suscribers', 'Visits', 'Likes', 'Comments']:
-        plt.figure(figsize=(10, 6))
-        sns.histplot(data[column], kde=True)
-        plt.title(f'Histograma de {column}')
-        st.pyplot(plt)
-
-    # Diagrama de torta (pastel) - Distribución de categorías
-    if 'Categories' in data.columns:
-        st.write("Diagrama de torta de las categorías")
-        category_counts = data['Categories'].value_counts()
-        plt.figure(figsize=(10, 6))
-        plt.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=140)
-        plt.title('Distribución de Categorías')
-        plt.axis('equal')
-        st.pyplot(plt)
-
-    # Diagrama de torta (pastel) - Distribución de países
-    if 'Country' in data.columns:
-        st.write("Diagrama de torta de los países")
-        country_counts = data['Country'].value_counts()
-        plt.figure(figsize=(10, 6))
-        plt.pie(country_counts, labels=country_counts.index, autopct='%1.1f%%', startangle=140)
-        plt.title('Distribución de Países')
-        plt.axis('equal')
-        st.pyplot(plt)
