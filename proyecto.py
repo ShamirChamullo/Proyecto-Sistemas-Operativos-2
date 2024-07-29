@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 import io
+from sklearn.linear_model import LinearRegression
+import numpy as np
 
 # Configurar estilo de los gráficos
 sns.set(style="whitegrid")
@@ -69,6 +71,12 @@ def generate_plots(df):
             plt.title('Regresión Lineal de Presión Arterial vs Colesterol')
             plt.xlabel('Presión Arterial en Reposo')
             plt.ylabel('Colesterol en Suero')
+            # Calcular y mostrar el coeficiente de correlación y el R cuadrado
+            X = df['restingBP'].values.reshape(-1, 1)
+            y = df['serumcholestrol'].values.reshape(-1, 1)
+            reg = LinearRegression().fit(X, y)
+            r_squared = reg.score(X, y)
+            plt.text(x=df['restingBP'].mean(), y=df['serumcholestrol'].max(), s=f'R cuadrado: {r_squared:.2f}', horizontalalignment='center', fontsize=12, color='blue')
         generate_and_save_plot(plot_regression, 'regresion_presion_colesterol.png')
 
     if 'oldpeak' in columns and 'target' in columns:
