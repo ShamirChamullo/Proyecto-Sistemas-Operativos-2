@@ -1,77 +1,56 @@
-import streamlit as st
 import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.preprocessing import OneHotEncoder
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
+import streamlit as st
 
-st.title('Regresión Lineal Simple')
+# Configuración de la página
+st.set_page_config(page_title="Regresión Lineal Simple", page_icon="📈")
 
-# Subir archivo CSV
-uploaded_file = st.file_uploader('Sube tu archivo CSV', type='csv')
+# Título de la aplicación
+st.title("Regresión Lineal Simple: Caloric Value vs Saturated Fats")
+
+# Cargar el archivo CSV
+uploaded_file = st.file_uploader("Carga tu archivo CSV", type=["csv"])
 
 if uploaded_file is not None:
-    # Cargar el archivo CSV
     data = pd.read_csv(uploaded_file)
+    st.write("Datos cargados:")
+    st.write(data.head())
 
-    # Convertir la columna 'food' a variables dummy
-    encoder = OneHotEncoder()
-    food_encoded = encoder.fit_transform(data[['food']]).toarray()
-    food_encoded_df = pd.DataFrame(food_encoded, columns=encoder.get_feature_names_out(['food']))
+    # Seleccionar las columnas "Caloric Value" y "Saturated Fats"
+    if 'Caloric Value' in data.columns and 'Saturated Fats' in data.columns:
+        X = data[['Caloric Value']].values
+        y = data['Saturated Fats'].values
 
-    # Añadir las columnas codificadas al dataframe original
-    data_encoded = pd.concat([data, food_encoded_df], axis=1)
+        # Dividir los datos en conjuntos de entrenamiento y prueba
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Extraer las columnas pertinentes para Caloric Value
-    X_caloric = food_encoded_df
-    y_caloric = data['Caloric Value']
+        # Crear el modelo de regresión lineal
+        model = LinearRegression()
 
-    # Extraer las columnas pertinentes para Saturated Fats
-    X_saturated = food_encoded_df
-    y_saturated = data['Saturated Fats']
+        # Entrenar el modelo
+        model.fit(X_train, y_train)
 
-    # Dividir los datos en conjuntos de entrenamiento y prueba
-    X_train_caloric, X_test_caloric, y_train_caloric, y_test_caloric = train_test_split(X_caloric, y_caloric, test_size=0.2, random_state=42)
-    X_train_saturated, X_test_saturated, y_train_saturated, y_test_saturated = train_test_split(X_saturated, y_saturated, test_size=0.2, random_state=42)
+        # Realizar predicciones
+        y_pred = model.predict(X_test)
 
-    # Crear los modelos de regresión lineal
-    model_caloric = LinearRegression()
-    model_saturated = LinearRegression()
+        # Evaluar el modelo
+        mse = mean_squared_error(y_test, y_pred)
+        r2 = r2_score(y_test, y_pred)
 
-    # Ajustar los modelos a los datos de entrenamiento
-    model_caloric.fit(X_train_caloric, y_train_caloric)
-    model_saturated.fit(X_train_saturated, y_train_saturated)
+        st.write(f'Mean Squared Error: {mse}')
+        st.write(f'R-squared: {r2}')
 
-    # Realizar predicciones sobre el conjunto de prueba
-    y_pred_caloric = model_caloric.predict(X_test_caloric)
-    y_pred_saturated = model_saturated.predict(X_test_saturated)
-
-    # Calcular el error cuadrático medio y el coeficiente de determinación R^2
-    mse_caloric = mean_squared_error(y_test_caloric, y_pred_caloric)
-    r2_caloric = r2_score(y_test_caloric, y_pred_caloric)
-    mse_saturated = mean_squared_error(y_test_saturated, y_pred_saturated)
-    r2_saturated = r2_score(y_test_saturated, y_pred_saturated)
-
-    # Mostrar los resultados
-    st.write(f'Caloric Value - MSE: {mse_caloric}, R^2: {r2_caloric}')
-    st.write(f'Saturated Fats - MSE: {mse_saturated}, R^2: {r2_saturated}')
-
-    # Visualizar los resultados para Caloric Value
-    fig_caloric, ax_caloric = plt.subplots()
-    ax_caloric.scatter(y_test_caloric, y_pred_caloric, color='blue', label='Datos reales vs Predicciones')
-    ax_caloric.set_xlabel('Valores reales de Caloric Value')
-    ax_caloric.set_ylabel('Valores predichos de Caloric Value')
-    ax_caloric.set_title('Regresión Lineal Simple - Caloric Value')
-    ax_caloric.legend()
-    st.pyplot(fig_caloric)
-
-    # Visualizar los resultados para Saturated Fats
-    fig_saturated, ax_saturated = plt.subplots()
-    ax_saturated.scatter(y_test_saturated, y_pred_saturated, color='blue', label='Datos reales vs Predicciones')
-    ax_saturated.set_xlabel('Valores reales de Saturated Fats')
-    ax_saturated.set_ylabel('Valores predichos de Saturated Fats')
-    ax_saturated.set_title('Regresión Lineal Simple - Saturated Fats')
-    ax_saturated.legend()
-    st.pyplot(fig_saturated)
+        # Visualizar los resultados
+        plt.figure(figsize=(10, 6))
+        plt.scatter(X_test, y_test, color='blue', label='Actual')
+        plt.plot(X_test, y_pred, color='red', linewidth=2, label='Predicted')
+        plt.xlabel('Caloric Value')
+        plt.ylabel('Saturated Fats')
+        plt.title('Regresión Lineal Simple: Caloric Value vs Saturated Fats')
+        plt.legend()
+        st.pyplot(plt.gcf())
+    else:
+        st.error("El archivo CSV debe contener las columnas 'Caloric Value' y 'Saturated Fats'.")
