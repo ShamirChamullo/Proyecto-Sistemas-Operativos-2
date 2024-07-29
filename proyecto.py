@@ -20,32 +20,40 @@ if uploaded_file is not None:
     st.write("Primeras filas del archivo:")
     st.write(data.head())
 
-    # Limpiar datos (remover filas con valores nulos en Suscribers o Visits)
-    data = data.dropna(subset=['Suscribers', 'Visits'])
+    # Limpiar datos (remover filas con valores nulos en Suscribers, Visits, Likes o Comments)
+    data = data.dropna(subset=['Suscribers', 'Visits', 'Likes', 'Comments'])
 
-    # Variables
+    # Función para crear gráficos de regresión
+    def plot_regression(x, y, x_label, y_label, title):
+        model = LinearRegression()
+        model.fit(x, y)
+        y_pred = model.predict(x)
+        r2 = r2_score(y, y_pred)
+        
+        plt.figure(figsize=(10, 6))
+        sns.scatterplot(x=x.flatten(), y=y, data=data, label='Datos reales')
+        plt.plot(x, y_pred, color='red', label='Regresión lineal')
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        plt.title(f'{title} (R² = {r2:.2f})')
+        plt.legend()
+        st.pyplot(plt)
+        st.write(f'Valor de R²: {r2:.2f}')
+    
+    # Regresión 1: Suscribers vs Visits
     X = data['Suscribers'].values.reshape(-1, 1)
     y = data['Visits'].values
+    st.write("Regresión lineal entre Suscriptores y Visitas")
+    plot_regression(X, y, 'Suscribers', 'Visits', 'Regresión Lineal entre Suscriptores y Visitas')
 
-    # Crear y ajustar el modelo de regresión lineal
-    model = LinearRegression()
-    model.fit(X, y)
+    # Regresión 2: Likes vs Visits
+    X = data['Likes'].values.reshape(-1, 1)
+    y = data['Visits'].values
+    st.write("Regresión lineal entre Likes y Visitas")
+    plot_regression(X, y, 'Likes', 'Visits', 'Regresión Lineal entre Likes y Visitas')
 
-    # Predicciones
-    y_pred = model.predict(X)
-
-    # Calcular R^2
-    r2 = r2_score(y, y_pred)
-
-    # Crear gráfico
-    plt.figure(figsize=(10, 6))
-    sns.scatterplot(x='Suscribers', y='Visits', data=data, label='Datos reales')
-    plt.plot(data['Suscribers'], y_pred, color='red', label='Regresión lineal')
-    plt.xlabel('Suscribers')
-    plt.ylabel('Visits')
-    plt.title(f'Regresión Lineal entre Suscriptores y Visitas (R² = {r2:.2f})')
-    plt.legend()
-
-    # Mostrar gráfico
-    st.pyplot(plt)
-    st.write(f'Valor de R²: {r2:.2f}')
+    # Regresión 3: Comments vs Visits
+    X = data['Comments'].values.reshape(-1, 1)
+    y = data['Visits'].values
+    st.write("Regresión lineal entre Comentarios y Visitas")
+    plot_regression(X, y, 'Comments', 'Visits', 'Regresión Lineal entre Comentarios y Visitas')
