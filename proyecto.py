@@ -23,6 +23,11 @@ if uploaded_file is not None:
     # Limpiar datos (remover filas con valores nulos en Suscribers, Visits, Likes o Comments)
     data = data.dropna(subset=['Suscribers', 'Visits', 'Likes', 'Comments'])
 
+    # Selección de variables para regresión lineal
+    st.write("Seleccione las variables para la regresión lineal simple:")
+    x_var = st.selectbox('Variable Independiente (X)', ['Suscribers', 'Likes', 'Comments'])
+    y_var = st.selectbox('Variable Dependiente (Y)', ['Visits'])
+
     # Función para crear gráficos de regresión
     def plot_regression(x, y, x_label, y_label, title):
         model = LinearRegression()
@@ -40,20 +45,35 @@ if uploaded_file is not None:
         st.pyplot(plt)
         st.write(f'Valor de R²: {r2:.2f}')
     
-    # Regresión 1: Suscribers vs Visits
-    X = data['Suscribers'].values.reshape(-1, 1)
-    y = data['Visits'].values
-    st.write("Regresión lineal entre Suscriptores y Visitas")
-    plot_regression(X, y, 'Suscribers', 'Visits', 'Regresión Lineal entre Suscriptores y Visitas')
+    # Ejecutar regresión lineal basada en selección del usuario
+    X = data[x_var].values.reshape(-1, 1)
+    y = data[y_var].values
+    plot_regression(X, y, x_var, y_var, f'Regresión Lineal entre {x_var} y {y_var}')
 
-    # Regresión 2: Likes vs Visits
-    X = data['Likes'].values.reshape(-1, 1)
-    y = data['Visits'].values
-    st.write("Regresión lineal entre Likes y Visitas")
-    plot_regression(X, y, 'Likes', 'Visits', 'Regresión Lineal entre Likes y Visitas')
+    # Histogramas
+    st.write("Histogramas de las variables numéricas")
+    for column in ['Suscribers', 'Visits', 'Likes', 'Comments']:
+        plt.figure(figsize=(10, 6))
+        sns.histplot(data[column], kde=True)
+        plt.title(f'Histograma de {column}')
+        st.pyplot(plt)
 
-    # Regresión 3: Comments vs Visits
-    X = data['Comments'].values.reshape(-1, 1)
-    y = data['Visits'].values
-    st.write("Regresión lineal entre Comentarios y Visitas")
-    plot_regression(X, y, 'Comments', 'Visits', 'Regresión Lineal entre Comentarios y Visitas')
+    # Diagrama de torta (pastel) - Distribución de categorías
+    if 'Categories' in data.columns:
+        st.write("Diagrama de torta de las categorías")
+        category_counts = data['Categories'].value_counts()
+        plt.figure(figsize=(10, 6))
+        plt.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=140)
+        plt.title('Distribución de Categorías')
+        plt.axis('equal')
+        st.pyplot(plt)
+
+    # Diagrama de torta (pastel) - Distribución de países
+    if 'Country' in data.columns:
+        st.write("Diagrama de torta de los países")
+        country_counts = data['Country'].value_counts()
+        plt.figure(figsize=(10, 6))
+        plt.pie(country_counts, labels=country_counts.index, autopct='%1.1f%%', startangle=140)
+        plt.title('Distribución de Países')
+        plt.axis('equal')
+        st.pyplot(plt)
