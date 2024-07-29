@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import statsmodels.api as sm
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
 
 # Configurar el estilo de los gráficos
 sns.set(style="whitegrid")
@@ -46,9 +49,23 @@ if uploaded_file is not None:
 
     # Regresión lineal simple entre el año y el precio de la marca seleccionada
     st.write(f'Regresión Lineal: Año vs Precio de {selected_make}')
+    
+    X = selected_make_data['Year'].values.reshape(-1, 1)
+    y = selected_make_data['Price (USD)'].values
+    
+    # Crear y ajustar el modelo de regresión lineal
+    model = LinearRegression()
+    model.fit(X, y)
+    
+    # Predicciones
+    y_pred = model.predict(X)
+    
+    # Calcular el coeficiente de determinación R^2
+    r2 = r2_score(y, y_pred)
+    
     plt.figure(figsize=(10, 6))
-    sns.regplot(x='Year', y='Price (USD)', data=selected_make_data)
-    plt.title(f'Regresión Lineal: Año vs Precio de {selected_make}')
+    sns.regplot(x='Year', y='Price (USD)', data=selected_make_data, line_kws={'color': 'red'})
+    plt.title(f'Regresión Lineal: Año vs Precio de {selected_make} (R^2 = {r2:.2f})')
     plt.xlabel('Año')
     plt.ylabel('Precio (USD)')
     st.pyplot(plt)
