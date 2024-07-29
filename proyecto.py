@@ -68,12 +68,35 @@ if uploaded_file is not None:
         plt.axis('equal')
         st.pyplot(plt)
 
-    # Diagrama de torta (pastel) - Distribución de países
-    if 'Country' in data.columns:
-        st.write("Diagrama de torta de los países")
-        country_counts = data['Country'].value_counts()
-        plt.figure(figsize=(10, 6))
-        plt.pie(country_counts, labels=country_counts.index, autopct='%1.1f%%', startangle=140)
-        plt.title('Distribución de Países')
-        plt.axis('equal')
-        st.pyplot(plt)
+        # Diagrama de tortas para cada categoría
+        for category in category_counts.index:
+            st.write(f"Diagrama de tortas para la categoría: {category}")
+            category_data = data[data['Categories'] == category]
+
+            # Pie chart for Visits
+            plt.figure(figsize=(10, 6))
+            plt.pie(category_data['Visits'], labels=category_data['Username'], autopct='%1.1f%%', startangle=140)
+            plt.title(f'Distribución de Visitas en la categoría {category}')
+            plt.axis('equal')
+            st.pyplot(plt)
+
+            # Pie chart for Suscribers
+            plt.figure(figsize=(10, 6))
+            plt.pie(category_data['Suscribers'], labels=category_data['Username'], autopct='%1.1f%%', startangle=140)
+            plt.title(f'Distribución de Suscriptores en la categoría {category}')
+            plt.axis('equal')
+            st.pyplot(plt)
+
+            # Pie chart for Likes
+            plt.figure(figsize=(10, 6))
+            plt.pie(category_data['Likes'], labels=category_data['Username'], autopct='%1.1f%%', startangle=140)
+            plt.title(f'Distribución de Likes en la categoría {category}')
+            plt.axis('equal')
+            st.pyplot(plt)
+
+            # Pie chart for Comments
+            plt.figure(figsize=(10, 6))
+            plt.pie(category_data['Comments'], labels=category_data['Username'], autopct='%1.1f%%', startangle=140)
+            plt.title(f'Distribución de Comentarios en la categoría {category}')
+            plt.axis('equal')
+            st.pyplot(plt)
