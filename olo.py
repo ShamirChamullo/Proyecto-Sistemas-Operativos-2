@@ -9,7 +9,7 @@ import streamlit as st
 st.set_page_config(page_title="Regresión Lineal Simple", page_icon="📈")
 
 # Título de la aplicación
-st.title("Regresión Lineal Simple: Caloric Value vs Saturated Fats")
+st.title("Regresión Lineal Simple: Caloric Value vs Saturated Fats por Tipo de Comida")
 
 # Cargar el archivo CSV
 uploaded_file = st.file_uploader("Carga tu archivo CSV", type=["csv"])
@@ -19,38 +19,43 @@ if uploaded_file is not None:
     st.write("Datos cargados:")
     st.write(data.head())
 
-    # Seleccionar las columnas "Caloric Value" y "Saturated Fats"
-    if 'Caloric Value' in data.columns and 'Saturated Fats' in data.columns:
-        X = data[['Caloric Value']].values
-        y = data['Saturated Fats'].values
+    # Verificar si las columnas necesarias existen
+    if 'Food Type' in data.columns and 'Caloric Value' in data.columns and 'Saturated Fats' in data.columns:
+        # Agrupar los datos por tipo de comida
+        food_types = data['Food Type'].unique()
+        for food_type in food_types:
+            st.subheader(f'Tipo de Comida: {food_type}')
+            subset = data[data['Food Type'] == food_type]
+            X = subset[['Caloric Value']].values
+            y = subset['Saturated Fats'].values
 
-        # Dividir los datos en conjuntos de entrenamiento y prueba
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+            # Dividir los datos en conjuntos de entrenamiento y prueba
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-        # Crear el modelo de regresión lineal
-        model = LinearRegression()
+            # Crear el modelo de regresión lineal
+            model = LinearRegression()
 
-        # Entrenar el modelo
-        model.fit(X_train, y_train)
+            # Entrenar el modelo
+            model.fit(X_train, y_train)
 
-        # Realizar predicciones
-        y_pred = model.predict(X_test)
+            # Realizar predicciones
+            y_pred = model.predict(X_test)
 
-        # Evaluar el modelo
-        mse = mean_squared_error(y_test, y_pred)
-        r2 = r2_score(y_test, y_pred)
+            # Evaluar el modelo
+            mse = mean_squared_error(y_test, y_pred)
+            r2 = r2_score(y_test, y_pred)
 
-        st.write(f'Mean Squared Error: {mse}')
-        st.write(f'R-squared: {r2}')
+            st.write(f'Mean Squared Error: {mse}')
+            st.write(f'R-squared: {r2}')
 
-        # Visualizar los resultados
-        plt.figure(figsize=(10, 6))
-        plt.scatter(X_test, y_test, color='blue', label='Actual')
-        plt.plot(X_test, y_pred, color='red', linewidth=2, label='Predicted')
-        plt.xlabel('Caloric Value')
-        plt.ylabel('Saturated Fats')
-        plt.title('Regresión Lineal Simple: Caloric Value vs Saturated Fats')
-        plt.legend()
-        st.pyplot(plt.gcf())
+            # Visualizar los resultados
+            plt.figure(figsize=(10, 6))
+            plt.scatter(X_test, y_test, color='blue', label='Actual')
+            plt.plot(X_test, y_pred, color='red', linewidth=2, label='Predicted')
+            plt.xlabel('Caloric Value')
+            plt.ylabel('Saturated Fats')
+            plt.title(f'Regresión Lineal Simple: {food_type}')
+            plt.legend()
+            st.pyplot(plt.gcf())
     else:
-        st.error("El archivo CSV debe contener las columnas 'Caloric Value' y 'Saturated Fats'.")
+        st.error("El archivo CSV debe contener las columnas 'Food Type', 'Caloric Value' y 'Saturated Fats'.")
