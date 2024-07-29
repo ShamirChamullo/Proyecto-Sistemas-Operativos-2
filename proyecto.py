@@ -22,7 +22,8 @@ def generate_and_save_plot(plot_func, file_name):
 # Función para generar y guardar el archivo Excel
 def save_to_excel(df, file_name):
     buf = io.BytesIO()
-    df.to_excel(buf, index=False)
+    with pd.ExcelWriter(buf, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False)
     buf.seek(0)
     st.download_button(label=f"Descargar {file_name}", data=buf, file_name=file_name, mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
