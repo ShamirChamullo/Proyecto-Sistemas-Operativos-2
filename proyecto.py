@@ -63,14 +63,6 @@ if uploaded_file is not None:
     y = filtered_data[y_var].values
     plot_regression(X, y, x_var, y_var, f'Regresión Lineal entre {x_var} y {y_var}')
 
-    # Histogramas generales
-    st.write("Histogramas generales de las variables numéricas")
-    for column in ['Suscribers', 'Visits', 'Likes', 'Comments']:
-        plt.figure(figsize=(10, 6))
-        sns.histplot(filtered_data[column], kde=True)
-        plt.title(f'Histograma de {column}')
-        st.pyplot(plt)
-
     # Diagrama de torta general - Distribución de categorías
     if 'Categories' in filtered_data.columns:
         st.write("Diagrama de torta de la distribución de categorías")
