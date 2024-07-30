@@ -5,6 +5,7 @@ import seaborn as sns
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 import numpy as np
+import matplotlib.ticker as mticker
 
 # Título
 st.title('Análisis de Youtubers')
@@ -65,7 +66,7 @@ if uploaded_file is not None:
         model.fit(x, y)
         y_pred = model.predict(x)
         r2 = r2_score(y, y_pred)
-        
+
         # Gráfico de regresión
         plt.figure(figsize=(10, 6))
         sns.scatterplot(x=x.flatten(), y=y, data=filtered_data, label='Datos reales')
@@ -73,6 +74,10 @@ if uploaded_file is not None:
         plt.xlabel(x_label)
         plt.ylabel(y_label)
         plt.title(f'{title} (R² = {r2:.2f})')
+
+        # Ajustar formato de los ejes
+        plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:,.0f}'))
+        plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y:,.0f}'))
         plt.legend()
         st.pyplot(plt)
 
@@ -88,8 +93,14 @@ if uploaded_file is not None:
     st.write("Distribución de Datos")
     for column in ['Suscribers', 'Visits', 'Likes', 'Comments']:
         plt.figure(figsize=(10, 6))
-        sns.kdeplot(filtered_data[column], shade=True)
+        sns.histplot(filtered_data[column], kde=True, bins=30)
+        plt.xlabel(column)
+        plt.ylabel('Frecuencia')
         plt.title(f'Distribución de {column}')
+
+        # Ajustar formato de los ejes
+        plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:,.0f}'))
+        plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y:,.0f}'))
         st.pyplot(plt)
 
     # Tendencias Temporales (si hay una columna de fecha)
@@ -103,6 +114,9 @@ if uploaded_file is not None:
         plt.ylabel('Valor')
         plt.title('Tendencias Temporales')
         plt.legend()
+
+        # Ajustar formato de los ejes
+        plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y:,.0f}'))
         st.pyplot(plt)
 
     # Gráfico de Pareto de Categorías
@@ -115,4 +129,7 @@ if uploaded_file is not None:
         plt.ylabel('Número de YouTubers')
         plt.title('Distribución de YouTubers por Categoría')
         plt.xticks(rotation=90)
+
+        # Ajustar formato de los ejes
+        plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y:,.0f}'))
         st.pyplot(plt)
