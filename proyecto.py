@@ -23,14 +23,12 @@ if uploaded_file is not None:
     # Limpiar datos (remover filas con valores nulos en Suscribers, Visits, Likes o Comments)
     data = data.dropna(subset=['Suscribers', 'Visits', 'Likes', 'Comments'])
 
-    # Controles deslizantes para filtrar los datos por suscriptores
-    st.write("Selecciona el rango de suscriptores para filtrar los datos:")
-    min_suscribers, max_suscribers = st.slider('Suscribers', min_value=int(data['Suscribers'].min()), max_value=int(data['Suscribers'].max()), value=(int(data['Suscribers'].min()), int(data['Suscribers'].max())))
+    # Control deslizante para limitar el número de filas a mostrar
+    st.write("Selecciona el número de filas a mostrar:")
+    num_rows = st.slider('Número de filas', min_value=1, max_value=len(data), value=len(data))
 
-    # Aplicar el filtro a los datos
-    filtered_data = data[
-        (data['Suscribers'] >= min_suscribers) & (data['Suscribers'] <= max_suscribers)
-    ]
+    # Aplicar el limitador de filas a los datos
+    filtered_data = data.head(num_rows)
 
     # Mostrar los datos filtrados
     st.write("Datos filtrados:")
