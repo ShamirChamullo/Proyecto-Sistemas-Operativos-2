@@ -62,23 +62,3 @@ if uploaded_file is not None:
     X = filtered_data[x_var].values.reshape(-1, 1)
     y = filtered_data[y_var].values
     plot_regression(X, y, x_var, y_var, f'Regresión Lineal entre {x_var} y {y_var}')
-
-    # Diagrama de torta general - Distribución de categorías
-    if 'Categories' in filtered_data.columns:
-        st.write("Diagrama de torta de la distribución de categorías")
-        category_counts = filtered_data['Categories'].value_counts()
-        plt.figure(figsize=(10, 6))
-        plt.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=140)
-        plt.title('Distribución de Categorías')
-        plt.axis('equal')
-        st.pyplot(plt)
-
-        # Mostrar la distribución general de visitas, suscriptores, likes y comentarios por categoría
-        st.write("Distribución general de visitas, suscriptores, likes y comentarios por categoría")
-        for metric in ['Visits', 'Suscribers', 'Likes', 'Comments']:
-            plt.figure(figsize=(10, 6))
-            metric_sums = filtered_data.groupby('Categories')[metric].sum()
-            plt.pie(metric_sums, labels=metric_sums.index, autopct='%1.1f%%', startangle=140)
-            plt.title(f'Distribución de {metric} por categoría')
-            plt.axis('equal')
-            st.pyplot(plt)
