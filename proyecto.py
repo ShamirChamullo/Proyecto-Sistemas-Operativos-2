@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.cluster import KMeans
 import numpy as np
 
 # Título
@@ -101,3 +102,88 @@ if uploaded_file is not None:
     X = filtered_data[x_var].values.reshape(-1, 1)
     y = filtered_data[y_var].values
     plot_regression(X, y, x_var, y_var, f'Regresión Lineal entre {x_var} y {y_var}')
+
+    # Mapa de Calor de Correlaciones
+    st.write("Mapa de Calor de Correlaciones")
+    plt.figure(figsize=(10, 8))
+    correlation_matrix = filtered_data[['Suscribers', 'Visits', 'Likes', 'Comments']].corr()
+    sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
+    plt.title('Mapa de Calor de Correlaciones')
+    st.pyplot(plt)
+
+    # Distribución de Datos
+    st.write("Distribución de Datos")
+    for column in ['Suscribers', 'Visits', 'Likes', 'Comments']:
+        plt.figure(figsize=(10, 6))
+        sns.kdeplot(filtered_data[column], shade=True)
+        plt.title(f'Distribución de {column}')
+        st.pyplot(plt)
+
+    # Análisis de Outliers
+    st.write("Análisis de Outliers")
+    for column in ['Suscribers', 'Visits', 'Likes', 'Comments']:
+        plt.figure(figsize=(10, 6))
+        sns.boxplot(x=filtered_data[column])
+        plt.title(f'Boxplot de {column}')
+        st.pyplot(plt)
+
+    # Tendencias Temporales (si hay una columna de fecha)
+    if 'Date' in filtered_data.columns:
+        filtered_data['Date'] = pd.to_datetime(filtered_data['Date'])
+        st.write("Tendencias Temporales")
+        plt.figure(figsize=(14, 7))
+        for column in ['Suscribers', 'Visits', 'Likes', 'Comments']:
+            plt.plot(filtered_data['Date'], filtered_data[column], label=column)
+        plt.xlabel('Fecha')
+        plt.ylabel('Valor')
+        plt.title('Tendencias Temporales')
+        plt.legend()
+        st.pyplot(plt)
+
+    # Gráfico de Pareto de Categorías
+    if 'Categories' in filtered_data.columns:
+        st.write("Gráfico de Pareto de Categorías")
+        category_counts = filtered_data['Categories'].value_counts()
+        plt.figure(figsize=(10, 6))
+        sns.barplot(x=category_counts.index, y=category_counts.values)
+        plt.xlabel('Categorías')
+        plt.ylabel('Número de YouTubers')
+        plt.title('Distribución de YouTubers por Categoría')
+        plt.xticks(rotation=90)
+        st.pyplot(plt)
+
+    # Regresión Múltiple
+    st.write("Regresión Múltiple")
+    if len(filtered_data[['Suscribers', 'Likes', 'Comments']].dropna()) > 0:
+        X = filtered_data[['Suscribers', 'Likes', 'Comments']]
+        y = filtered_data['Visits']
+
+        model = LinearRegression()
+        model.fit(X, y)
+        y_pred = model.predict(X)
+        r2 = r2_score(y, y_pred)
+        mse = mean_squared_error(y, y_pred)
+
+        plt.figure(figsize=(14, 7))
+        sns.scatterplot(x=y, y=y_pred, data=filtered_data)
+        plt.xlabel('Valores Reales')
+        plt.ylabel('Predicciones')
+        plt.title(f'Regresión Múltiple (R² = {r2:.2f})')
+        plt.axhline(y.mean(), color='red', linestyle='--')
+        st.pyplot(plt)
+
+        st.write(f'**Error Cuadrático Medio (MSE)**: {mse:.2f}')
+        st.write(f'**Valor de R²**: {r2:.2f}')
+
+    # Análisis de Clústeres
+    st.write("Análisis de Clústeres")
+    num_clusters = st.slider('Número de Clústeres', min_value=2, max_value=10, value=3)
+    kmeans = KMeans(n_clusters=num_clusters)
+    filtered_data['Cluster'] = kmeans.fit_predict(filtered_data[['Suscribers', 'Visits', 'Likes', 'Comments']])
+
+    plt.figure(figsize=(14, 7))
+    sns.scatterplot(x='Suscribers', y='Visits', hue='Cluster', data=filtered_data, palette='viridis')
+    plt.title('Clustering de YouTubers')
+    plt.xlabel('Suscriptores')
+    plt.ylabel('Visitas')
+    st.pyplot(plt)
