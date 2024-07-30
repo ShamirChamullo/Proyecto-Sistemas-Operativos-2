@@ -69,17 +69,17 @@ if uploaded_file is not None:
     y = filtered_data[y_var].values
     plot_regression(X, y, x_var, y_var, f'Regresión Lineal entre {x_var} y {y_var}')
 
-    # Histogramas
-    st.write("Histogramas de las variables numéricas")
+    # Histogramas generales
+    st.write("Histogramas generales de las variables numéricas")
     for column in ['Suscribers', 'Visits', 'Likes', 'Comments']:
         plt.figure(figsize=(10, 6))
         sns.histplot(filtered_data[column], kde=True)
         plt.title(f'Histograma de {column}')
         st.pyplot(plt)
 
-    # Diagrama de torta (pastel) - Distribución de categorías
+    # Diagrama de torta general - Distribución de categorías
     if 'Categories' in filtered_data.columns:
-        st.write("Diagrama de torta de las categorías")
+        st.write("Diagrama de torta de la distribución de categorías")
         category_counts = filtered_data['Categories'].value_counts()
         plt.figure(figsize=(10, 6))
         plt.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=140)
@@ -87,35 +87,12 @@ if uploaded_file is not None:
         plt.axis('equal')
         st.pyplot(plt)
 
-        # Diagrama de tortas para cada categoría
-        for category in category_counts.index:
-            st.write(f"Diagrama de tortas para la categoría: {category}")
-            category_data = filtered_data[filtered_data['Categories'] == category]
-
-            # Pie chart for Visits
+        # Mostrar la distribución general de visitas, suscriptores, likes y comentarios
+        st.write("Distribución general de visitas, suscriptores, likes y comentarios por categoría")
+        for metric in ['Visits', 'Suscribers', 'Likes', 'Comments']:
             plt.figure(figsize=(10, 6))
-            plt.pie(category_data['Visits'], labels=category_data['Username'], autopct='%1.1f%%', startangle=140)
-            plt.title(f'Distribución de Visitas en la categoría {category}')
-            plt.axis('equal')
-            st.pyplot(plt)
-
-            # Pie chart for Suscribers
-            plt.figure(figsize=(10, 6))
-            plt.pie(category_data['Suscribers'], labels=category_data['Username'], autopct='%1.1f%%', startangle=140)
-            plt.title(f'Distribución de Suscriptores en la categoría {category}')
-            plt.axis('equal')
-            st.pyplot(plt)
-
-            # Pie chart for Likes
-            plt.figure(figsize=(10, 6))
-            plt.pie(category_data['Likes'], labels=category_data['Username'], autopct='%1.1f%%', startangle=140)
-            plt.title(f'Distribución de Likes en la categoría {category}')
-            plt.axis('equal')
-            st.pyplot(plt)
-
-            # Pie chart for Comments
-            plt.figure(figsize=(10, 6))
-            plt.pie(category_data['Comments'], labels=category_data['Username'], autopct='%1.1f%%', startangle=140)
-            plt.title(f'Distribución de Comentarios en la categoría {category}')
+            metric_sums = filtered_data.groupby('Categories')[metric].sum()
+            plt.pie(metric_sums, labels=metric_sums.index, autopct='%1.1f%%', startangle=140)
+            plt.title(f'Distribución de {metric} por categoría')
             plt.axis('equal')
             st.pyplot(plt)
