@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
+from sklearn.metrics import r2_score, mean_squared_error
 import numpy as np
 
 # Título
@@ -55,8 +55,13 @@ if uploaded_file is not None:
         model.fit(x, y)
         y_pred = model.predict(x)
         r2 = r2_score(y, y_pred)
-        
-        plt.figure(figsize=(10, 6))
+        mse = mean_squared_error(y, y_pred)
+        coef = model.coef_[0]
+        intercept = model.intercept_
+
+        # Gráfico de regresión
+        plt.figure(figsize=(14, 7))
+        plt.subplot(1, 2, 1)
         sns.scatterplot(x=x.flatten(), y=y, data=filtered_data, label='Datos reales')
         plt.plot(x, y_pred, color='red', label='Regresión lineal')
         plt.xlabel(x_label)
@@ -64,12 +69,23 @@ if uploaded_file is not None:
         plt.title(f'{title} (R² = {r2:.2f})')
         plt.legend()
 
-        # Formato de ejes para números enteros
-        plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{int(x):,}'))
-        plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{int(y):,}'))
+        # Gráfico de residuos
+        plt.subplot(1, 2, 2)
+        residuals = y - y_pred
+        sns.scatterplot(x=y_pred, y=residuals, data=filtered_data)
+        plt.axhline(0, color='red', linestyle='--')
+        plt.xlabel('Predicciones')
+        plt.ylabel('Residuos')
+        plt.title('Gráfico de Residuos')
 
+        plt.tight_layout()
         st.pyplot(plt)
-        st.write(f'Valor de R²: {r2:.2f}')
+
+        # Mostrar métricas
+        st.write(f'**Coeficiente de Regresión (pendiente)**: {coef:.2f}')
+        st.write(f'**Intersección (intercepto)**: {intercept:.2f}')
+        st.write(f'**Error Cuadrático Medio (MSE)**: {mse:.2f}')
+        st.write(f'**Valor de R²**: {r2:.2f}')
     
     # Ejecutar regresión lineal basada en selección del usuario
     X = filtered_data[x_var].values.reshape(-1, 1)
