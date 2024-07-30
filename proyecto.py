@@ -23,19 +23,13 @@ if uploaded_file is not None:
     # Limpiar datos (remover filas con valores nulos en Suscribers, Visits, Likes o Comments)
     data = data.dropna(subset=['Suscribers', 'Visits', 'Likes', 'Comments'])
 
-    # Controles deslizantes para filtrar los datos
-    st.write("Selecciona el rango de valores para filtrar los datos:")
+    # Controles deslizantes para filtrar los datos por suscriptores
+    st.write("Selecciona el rango de suscriptores para filtrar los datos:")
     min_suscribers, max_suscribers = st.slider('Suscribers', min_value=int(data['Suscribers'].min()), max_value=int(data['Suscribers'].max()), value=(int(data['Suscribers'].min()), int(data['Suscribers'].max())))
-    min_visits, max_visits = st.slider('Visits', min_value=int(data['Visits'].min()), max_value=int(data['Visits'].max()), value=(int(data['Visits'].min()), int(data['Visits'].max())))
-    min_likes, max_likes = st.slider('Likes', min_value=int(data['Likes'].min()), max_value=int(data['Likes'].max()), value=(int(data['Likes'].min()), int(data['Likes'].max())))
-    min_comments, max_comments = st.slider('Comments', min_value=int(data['Comments'].min()), max_value=int(data['Comments'].max()), value=(int(data['Comments'].min()), int(data['Comments'].max())))
 
     # Aplicar el filtro a los datos
     filtered_data = data[
-        (data['Suscribers'] >= min_suscribers) & (data['Suscribers'] <= max_suscribers) &
-        (data['Visits'] >= min_visits) & (data['Visits'] <= max_visits) &
-        (data['Likes'] >= min_likes) & (data['Likes'] <= max_likes) &
-        (data['Comments'] >= min_comments) & (data['Comments'] <= max_comments)
+        (data['Suscribers'] >= min_suscribers) & (data['Suscribers'] <= max_suscribers)
     ]
 
     # Mostrar los datos filtrados
@@ -87,7 +81,7 @@ if uploaded_file is not None:
         plt.axis('equal')
         st.pyplot(plt)
 
-        # Mostrar la distribución general de visitas, suscriptores, likes y comentarios
+        # Mostrar la distribución general de visitas, suscriptores, likes y comentarios por categoría
         st.write("Distribución general de visitas, suscriptores, likes y comentarios por categoría")
         for metric in ['Visits', 'Suscribers', 'Likes', 'Comments']:
             plt.figure(figsize=(10, 6))
