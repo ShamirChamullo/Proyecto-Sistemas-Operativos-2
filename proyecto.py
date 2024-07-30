@@ -6,6 +6,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 import numpy as np
 import matplotlib.ticker as mticker
+from io import BytesIO
 
 # Título
 st.title('Análisis de Youtubers')
@@ -35,6 +36,13 @@ if uploaded_file is not None:
     st.write("Datos filtrados:")
     st.write(filtered_data)
 
+    # Función para guardar gráficos como archivos en un buffer
+    def save_plot_to_buffer(fig):
+        buf = BytesIO()
+        fig.savefig(buf, format="png")
+        buf.seek(0)
+        return buf
+
     # Gráfico de torta de la distribución de YouTubers por país
     if 'Country' in filtered_data.columns:
         st.write("Distribución de YouTubers por país")
@@ -43,7 +51,9 @@ if uploaded_file is not None:
         plt.pie(country_counts, labels=country_counts.index, autopct='%1.1f%%', startangle=140)
         plt.title('Distribución de YouTubers por País')
         plt.axis('equal')
+        buf = save_plot_to_buffer(plt.gcf())
         st.pyplot(plt)
+        st.download_button(label="Descargar gráfico de distribución por país", data=buf, file_name="distribucion_pais.png", mime="image/png")
 
     # Gráfico de torta de la distribución de categorías
     if 'Categories' in filtered_data.columns:
@@ -53,7 +63,9 @@ if uploaded_file is not None:
         plt.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=140)
         plt.title('Distribución de YouTubers por Categoría')
         plt.axis('equal')
+        buf = save_plot_to_buffer(plt.gcf())
         st.pyplot(plt)
+        st.download_button(label="Descargar gráfico de distribución por categoría", data=buf, file_name="distribucion_categoria.png", mime="image/png")
 
     # Selección de variables para regresión lineal
     st.write("Seleccione las variables para la regresión lineal simple:")
@@ -79,7 +91,9 @@ if uploaded_file is not None:
         plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:,.0f}'))
         plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y:,.0f}'))
         plt.legend()
+        buf = save_plot_to_buffer(plt.gcf())
         st.pyplot(plt)
+        st.download_button(label="Descargar gráfico de regresión", data=buf, file_name="regresion_lineal.png", mime="image/png")
 
         # Mostrar valor de R²
         st.write(f'**Valor de R²**: {r2:.2f}')
@@ -101,7 +115,9 @@ if uploaded_file is not None:
         # Ajustar formato de los ejes
         plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:,.0f}'))
         plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y:,.0f}'))
+        buf = save_plot_to_buffer(plt.gcf())
         st.pyplot(plt)
+        st.download_button(label=f"Descargar gráfico de distribución de {column}", data=buf, file_name=f"distribucion_{column}.png", mime="image/png")
 
     # Tendencias Temporales (si hay una columna de fecha)
     if 'Date' in filtered_data.columns:
@@ -117,7 +133,9 @@ if uploaded_file is not None:
 
         # Ajustar formato de los ejes
         plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y:,.0f}'))
+        buf = save_plot_to_buffer(plt.gcf())
         st.pyplot(plt)
+        st.download_button(label="Descargar gráfico de tendencias temporales", data=buf, file_name="tendencias_temporales.png", mime="image/png")
 
     # Gráfico de Pareto de Categorías
     if 'Categories' in filtered_data.columns:
@@ -132,4 +150,14 @@ if uploaded_file is not None:
 
         # Ajustar formato de los ejes
         plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y:,.0f}'))
+        buf = save_plot_to_buffer(plt.gcf())
         st.pyplot(plt)
+        st.download_button(label="Descargar gráfico de Pareto de Categorías", data=buf, file_name="pareto_categorias.png", mime="image/png")
+
+    # Descargar archivo Excel con los datos
+    st.write("Descargar datos como archivo Excel")
+    excel_buffer = BytesIO()
+    with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
+        filtered_data.to_excel(writer, sheet_name='Datos', index=False)
+    excel_buffer.seek(0)
+    st.download_button(label="Descargar datos como Excel", data=excel_buffer, file_name="datos_youtubers.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
