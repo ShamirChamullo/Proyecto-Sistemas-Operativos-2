@@ -19,7 +19,7 @@ if uploaded_file is not None:
     data = pd.read_csv(uploaded_file)
 
     # Mostrar las primeras filas del DataFrame
-    st.write("Primeras filas del archivo:")
+    st.write("LOs primeros 5 youtubers mas grandes")
     st.write(data.head())
 
     # Limpiar datos (remover filas con valores nulos en Suscribers, Visits, Likes o Comments)
