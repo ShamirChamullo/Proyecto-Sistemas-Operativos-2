@@ -65,7 +65,7 @@ if uploaded_file is not None:
         model.fit(x, y)
         y_pred = model.predict(x)
         r2 = r2_score(y, y_pred)
-
+        
         # Gráfico de regresión
         plt.figure(figsize=(10, 6))
         sns.scatterplot(x=x.flatten(), y=y, data=filtered_data, label='Datos reales')
