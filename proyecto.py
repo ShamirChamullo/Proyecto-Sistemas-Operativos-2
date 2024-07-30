@@ -34,6 +34,16 @@ if uploaded_file is not None:
     st.write("Datos filtrados:")
     st.write(filtered_data)
 
+    # Gráfico de torta de la distribución de YouTubers por país
+    if 'Country' in filtered_data.columns:
+        st.write("Distribución de YouTubers por país")
+        country_counts = filtered_data['Country'].value_counts()
+        plt.figure(figsize=(10, 6))
+        plt.pie(country_counts, labels=country_counts.index, autopct='%1.1f%%', startangle=140)
+        plt.title('Distribución de YouTubers por País')
+        plt.axis('equal')
+        st.pyplot(plt)
+
     # Selección de variables para regresión lineal
     st.write("Seleccione las variables para la regresión lineal simple:")
     x_var = st.selectbox('Variable Independiente (X)', ['Suscribers', 'Likes', 'Comments'])
