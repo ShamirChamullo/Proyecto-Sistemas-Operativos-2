@@ -23,20 +23,29 @@ if uploaded_file is not None:
     # Limpiar datos (remover filas con valores nulos en Suscribers, Visits, Likes o Comments)
     data = data.dropna(subset=['Suscribers', 'Visits', 'Likes', 'Comments'])
 
+    # Controles deslizantes para filtrar los datos
+    st.write("Selecciona el rango de valores para filtrar los datos:")
+    min_suscribers, max_suscribers = st.slider('Suscribers', min_value=int(data['Suscribers'].min()), max_value=int(data['Suscribers'].max()), value=(int(data['Suscribers'].min()), int(data['Suscribers'].max())))
+    min_visits, max_visits = st.slider('Visits', min_value=int(data['Visits'].min()), max_value=int(data['Visits'].max()), value=(int(data['Visits'].min()), int(data['Visits'].max())))
+    min_likes, max_likes = st.slider('Likes', min_value=int(data['Likes'].min()), max_value=int(data['Likes'].max()), value=(int(data['Likes'].min()), int(data['Likes'].max())))
+    min_comments, max_comments = st.slider('Comments', min_value=int(data['Comments'].min()), max_value=int(data['Comments'].max()), value=(int(data['Comments'].min()), int(data['Comments'].max())))
+
+    # Aplicar el filtro a los datos
+    filtered_data = data[
+        (data['Suscribers'] >= min_suscribers) & (data['Suscribers'] <= max_suscribers) &
+        (data['Visits'] >= min_visits) & (data['Visits'] <= max_visits) &
+        (data['Likes'] >= min_likes) & (data['Likes'] <= max_likes) &
+        (data['Comments'] >= min_comments) & (data['Comments'] <= max_comments)
+    ]
+
+    # Mostrar los datos filtrados
+    st.write("Datos filtrados:")
+    st.write(filtered_data)
+
     # Selección de variables para regresión lineal
     st.write("Seleccione las variables para la regresión lineal simple:")
     x_var = st.selectbox('Variable Independiente (X)', ['Suscribers', 'Likes', 'Comments'])
     y_var = st.selectbox('Variable Dependiente (Y)', ['Visits'])
-
-    # Selección de rango de datos
-    st.write(f"Seleccione el rango de valores para {x_var} y {y_var}:")
-    x_min = st.number_input(f"Valor mínimo de {x_var}", value=float(data[x_var].min()))
-    x_max = st.number_input(f"Valor máximo de {x_var}", value=float(data[x_var].max()))
-    y_min = st.number_input(f"Valor mínimo de {y_var}", value=float(data[y_var].min()))
-    y_max = st.number_input(f"Valor máximo de {y_var}", value=float(data[y_var].max()))
-
-    # Filtrar datos según los rangos seleccionados
-    filtered_data = data[(data[x_var] >= x_min) & (data[x_var] <= x_max) & (data[y_var] >= y_min) & (data[y_var] <= y_max)]
 
     # Función para crear gráficos de regresión
     def plot_regression(x, y, x_label, y_label, title):
@@ -64,14 +73,14 @@ if uploaded_file is not None:
     st.write("Histogramas de las variables numéricas")
     for column in ['Suscribers', 'Visits', 'Likes', 'Comments']:
         plt.figure(figsize=(10, 6))
-        sns.histplot(data[column], kde=True)
+        sns.histplot(filtered_data[column], kde=True)
         plt.title(f'Histograma de {column}')
         st.pyplot(plt)
 
     # Diagrama de torta (pastel) - Distribución de categorías
-    if 'Categories' in data.columns:
+    if 'Categories' in filtered_data.columns:
         st.write("Diagrama de torta de las categorías")
-        category_counts = data['Categories'].value_counts()
+        category_counts = filtered_data['Categories'].value_counts()
         plt.figure(figsize=(10, 6))
         plt.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=140)
         plt.title('Distribución de Categorías')
@@ -81,7 +90,7 @@ if uploaded_file is not None:
         # Diagrama de tortas para cada categoría
         for category in category_counts.index:
             st.write(f"Diagrama de tortas para la categoría: {category}")
-            category_data = data[data['Categories'] == category]
+            category_data = filtered_data[filtered_data['Categories'] == category]
 
             # Pie chart for Visits
             plt.figure(figsize=(10, 6))
