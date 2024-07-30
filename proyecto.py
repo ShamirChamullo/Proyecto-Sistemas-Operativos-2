@@ -55,6 +55,11 @@ if uploaded_file is not None:
         plt.ylabel(y_label)
         plt.title(f'{title} (R² = {r2:.2f})')
         plt.legend()
+
+        # Formato de ejes para números enteros
+        plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{int(x):,}'))
+        plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{int(y):,}'))
+
         st.pyplot(plt)
         st.write(f'Valor de R²: {r2:.2f}')
     
