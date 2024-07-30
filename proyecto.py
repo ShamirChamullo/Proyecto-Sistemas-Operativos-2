@@ -50,24 +50,41 @@ if uploaded_file is not None:
     # Función para crear gráficos de regresión
     def plot_regression(x, y, x_label, y_label, title):
         model = LinearRegression()
-        model.fit(x, y)
-        y_pred = model.predict(x)
-        r2 = r2_score(y, y_pred)
-        
-        plt.figure(figsize=(10, 6))
-        sns.scatterplot(x=x.flatten(), y=y, data=filtered_data, label='Datos reales')
-        plt.plot(x, y_pred, color='red', label='Regresión lineal')
-        plt.xlabel(x_label)
-        plt.ylabel(y_label)
-        plt.title(f'{title} (R² = {r2:.2f})')
-        plt.legend()
-        st.pyplot(plt)
-        st.write(f'Valor de R²: {r2:.2f}')
-    
-    # Ejecutar regresión lineal basada en selección del usuario
-    X = filtered_data[x_var].values.reshape(-1, 1)
-    y = filtered_data[y_var].values
-    plot_regression(X, y, x_var, y_var, f'Regresión Lineal entre {x_var} y {y_var}')
+        try:
+            model.fit(x, y)
+            y_pred = model.predict(x)
+            r2 = r2_score(y, y_pred)
+            
+            plt.figure(figsize=(10, 6))
+            sns.scatterplot(x=x.flatten(), y=y, data=filtered_data, label='Datos reales')
+            plt.plot(x, y_pred, color='red', label='Regresión lineal')
+            plt.xlabel(x_label)
+            plt.ylabel(y_label)
+            plt.title(f'{title} (R² = {r2:.2f})')
+            plt.legend()
+            st.pyplot(plt)
+            st.write(f'Valor de R²: {r2:.2f}')
+        except Exception as e:
+            st.write(f"Error al ajustar el modelo: {e}")
+
+    # Verificar y preparar los datos para la regresión
+    if filtered_data.shape[0] > 0:
+        X = filtered_data[x_var].values.reshape(-1, 1)
+        y = filtered_data[y_var].values
+
+        # Comprobar los tipos y tamaños
+        st.write(f"Tipo de X: {type(X)}")
+        st.write(f"Tipo de y: {type(y)}")
+        st.write(f"Tamaño de X: {X.shape}")
+        st.write(f"Tamaño de y: {y.shape}")
+
+        # Verificar que X e y tienen el mismo número de muestras
+        if X.shape[0] == y.shape[0]:
+            plot_regression(X, y, x_var, y_var, f'Regresión Lineal entre {x_var} y {y_var}')
+        else:
+            st.write("El número de muestras en X y y no coincide.")
+    else:
+        st.write("No hay datos para mostrar después del filtrado.")
 
     # Histogramas
     st.write("Histogramas de las variables numéricas")
