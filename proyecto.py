@@ -103,28 +103,12 @@ if uploaded_file is not None:
     y = filtered_data[y_var].values
     plot_regression(X, y, x_var, y_var, f'Regresión Lineal entre {x_var} y {y_var}')
 
-    # Mapa de Calor de Correlaciones
-    st.write("Mapa de Calor de Correlaciones")
-    plt.figure(figsize=(10, 8))
-    correlation_matrix = filtered_data[['Suscribers', 'Visits', 'Likes', 'Comments']].corr()
-    sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
-    plt.title('Mapa de Calor de Correlaciones')
-    st.pyplot(plt)
-
     # Distribución de Datos
     st.write("Distribución de Datos")
     for column in ['Suscribers', 'Visits', 'Likes', 'Comments']:
         plt.figure(figsize=(10, 6))
         sns.kdeplot(filtered_data[column], shade=True)
         plt.title(f'Distribución de {column}')
-        st.pyplot(plt)
-
-    # Análisis de Outliers
-    st.write("Análisis de Outliers")
-    for column in ['Suscribers', 'Visits', 'Likes', 'Comments']:
-        plt.figure(figsize=(10, 6))
-        sns.boxplot(x=filtered_data[column])
-        plt.title(f'Boxplot de {column}')
         st.pyplot(plt)
 
     # Tendencias Temporales (si hay una columna de fecha)
@@ -151,29 +135,6 @@ if uploaded_file is not None:
         plt.title('Distribución de YouTubers por Categoría')
         plt.xticks(rotation=90)
         st.pyplot(plt)
-
-    # Regresión Múltiple
-    st.write("Regresión Múltiple")
-    if len(filtered_data[['Suscribers', 'Likes', 'Comments']].dropna()) > 0:
-        X = filtered_data[['Suscribers', 'Likes', 'Comments']]
-        y = filtered_data['Visits']
-
-        model = LinearRegression()
-        model.fit(X, y)
-        y_pred = model.predict(X)
-        r2 = r2_score(y, y_pred)
-        mse = mean_squared_error(y, y_pred)
-
-        plt.figure(figsize=(14, 7))
-        sns.scatterplot(x=y, y=y_pred, data=filtered_data)
-        plt.xlabel('Valores Reales')
-        plt.ylabel('Predicciones')
-        plt.title(f'Regresión Múltiple (R² = {r2:.2f})')
-        plt.axhline(y.mean(), color='red', linestyle='--')
-        st.pyplot(plt)
-
-        st.write(f'**Error Cuadrático Medio (MSE)**: {mse:.2f}')
-        st.write(f'**Valor de R²**: {r2:.2f}')
 
     # Análisis de Clústeres
     st.write("Análisis de Clústeres")
